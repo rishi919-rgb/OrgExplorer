@@ -194,7 +194,6 @@ export function getTopRepositories(repos, limit = 10) {
       const score =
         (repo.stargazers_count ?? 0) +
         (repo.forks_count ?? 0) * 2 +
-        (repo.watchers_count ?? 0) * 1.5 +
         activityBonus;
 
       return {

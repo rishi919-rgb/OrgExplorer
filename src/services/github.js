@@ -142,13 +142,14 @@ async function fetchWithCache(url, pat) {
 
 // Public service functions
 export const fetchOrg = (org, pat) =>
-  fetchWithCache(`https://api.github.com/orgs/${org}`, pat)
+  fetchWithCache(`https://api.github.com/orgs/${encodeURIComponent(org)}`, pat)
 
 export async function fetchRepos(org, repoCount, pat) {
   const all = []
   const maxPages = pat ? Math.ceil(repoCount / 100) : 5
+  const encodedOrg = encodeURIComponent(org)
   for (let page = 1; page <= maxPages; page++) {
-    const url = `https://api.github.com/orgs/${org}/repos?per_page=100&page=${page}&sort=updated`
+    const url = `https://api.github.com/orgs/${encodedOrg}/repos?per_page=100&page=${page}&sort=updated`
     const data = await fetchWithCache(url, pat)
     all.push(...data)
     if (data.length < 100) break
@@ -159,11 +160,13 @@ export async function fetchRepos(org, repoCount, pat) {
 export async function fetchContributors(org, repo, pat) {
   const all = []
   const maxPages = pat ? 10 : 1
-  for(let page = 1; page<=maxPages ; page++) {
-    const url = `https://api.github.com/repos/${org}/${repo}/contributors?per_page=100&page=${page}`
+  const encodedOrg = encodeURIComponent(org)
+  const encodedRepo = encodeURIComponent(repo)
+  for (let page = 1; page <= maxPages; page++) {
+    const url = `https://api.github.com/repos/${encodedOrg}/${encodedRepo}/contributors?per_page=100&page=${page}`
     const data = await fetchWithCache(url, pat)
     all.push(...data)
-    if(data.length < 100) break
+    if (data.length < 100) break
   }
   return all
 }
@@ -171,11 +174,13 @@ export async function fetchContributors(org, repo, pat) {
 export async function fetchIssues(org, repo, pat) {
   const all = []
   const maxPages = pat ? 10 : 1
-  for(let page = 1; page<=maxPages ; page++) {
-    const url = `https://api.github.com/repos/${org}/${repo}/issues?state=all&per_page=100&page=${page}`
+  const encodedOrg = encodeURIComponent(org)
+  const encodedRepo = encodeURIComponent(repo)
+  for (let page = 1; page <= maxPages; page++) {
+    const url = `https://api.github.com/repos/${encodedOrg}/${encodedRepo}/issues?state=all&per_page=100&page=${page}`
     const data = await fetchWithCache(url, pat)
     all.push(...data)
-    if(data.length < 100) break
+    if (data.length < 100) break
   }
   return all
 }
@@ -183,11 +188,13 @@ export async function fetchIssues(org, repo, pat) {
 export async function fetchPulls(org, repo, pat) {
   const all = []
   const maxPages = pat ? 10 : 1
-  for(let page = 1; page<=maxPages ; page++) {
-    const url = `https://api.github.com/repos/${org}/${repo}/pulls?state=all&per_page=100&page=${page}`
+  const encodedOrg = encodeURIComponent(org)
+  const encodedRepo = encodeURIComponent(repo)
+  for (let page = 1; page <= maxPages; page++) {
+    const url = `https://api.github.com/repos/${encodedOrg}/${encodedRepo}/pulls?state=all&per_page=100&page=${page}`
     const data = await fetchWithCache(url, pat)
     all.push(...data)
-    if(data.length < 100) break
+    if (data.length < 100) break
   }
   return all
 }

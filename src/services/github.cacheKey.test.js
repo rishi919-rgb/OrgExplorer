@@ -1,5 +1,12 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { normalizeCacheKey, fetchOrg, fetchRepos, fetchContributors } from './github'
+import {
+  normalizeCacheKey,
+  fetchOrg,
+  fetchRepos,
+  fetchContributors,
+  fetchIssues,
+  fetchPulls,
+} from './github'
 
 /** Minimal in-memory stand-in for the IndexedDB API surface used by github.js. */
 function installFakeIndexedDB() {
@@ -234,5 +241,29 @@ describe('empty-repository responses', () => {
     }))
 
     await expect(fetchOrg('test-org', 'pat')).rejects.toThrow('HTTP_403')
+  })
+})
+
+describe('URL encoding for org and repo parameters', () => {
+  it('encodes org and repo names with special characters into API paths', async () => {
+    installFakeIndexedDB()
+    const calls = installCountingFetch([])
+
+    await fetchOrg('test/org', 'pat')
+    expect(calls[calls.length - 1]).toBe('https://api.github.com/orgs/test%2Forg')
+
+    await fetchRepos('test org', 1, 'pat')
+    expect(calls[calls.length - 1]).toContain('https://api.github.com/orgs/test%20org/repos')
+
+    await fetchContributors('test/org', 'my repo#1', 'pat')
+    expect(calls[calls.length - 1]).toContain(
+      'https://api.github.com/repos/test%2Forg/my%20repo%231/contributors'
+    )
+
+    await fetchIssues('test/org', 'c++', 'pat')
+    expect(calls[calls.length - 1]).toContain('https://api.github.com/repos/test%2Forg/c%2B%2B/issues')
+
+    await fetchPulls('test?org', 'repo?name', 'pat')
+    expect(calls[calls.length - 1]).toContain('https://api.github.com/repos/test%3Forg/repo%3Fname/pulls')
   })
 })

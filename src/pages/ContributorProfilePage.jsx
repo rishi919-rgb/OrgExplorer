@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { FiArrowLeft, FiDownload, FiExternalLink, FiCalendar, FiBriefcase, FiAlertTriangle } from 'react-icons/fi'
 import { useApp } from '../context/AppContext'
 import { C, PageTitle, Spinner, StatCard } from '../components/UI'
+import { getRecentSearches } from '../utils/recentSearches'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 const ITEMS_PER_PAGE = 10
 
@@ -185,16 +186,9 @@ export default function ContributorProfilePage() {
   const searchOrgs = useMemo(() => {
     let list = orgs.map(o => o.login)
     if (!list.length) {
-      try {
-        const rawRecent = localStorage.getItem('oe_recent')
-        if (rawRecent) {
-          const recent = JSON.parse(rawRecent)
-          if (Array.isArray(recent) && recent.length && typeof recent[0] === 'string') {
-            list = recent[0].split(',').map(s => s.trim()).filter(Boolean)
-          }
-        }
-      } catch (e) {
-        console.error('Failed to parse oe_recent from localStorage:', e)
+      const recent = getRecentSearches()
+      if (recent.length) {
+        list = recent[0].split(',').map(s => s.trim()).filter(Boolean)
       }
     }
     return list

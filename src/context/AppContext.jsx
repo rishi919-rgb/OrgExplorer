@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useCallback, useEffect, useMemo, u
 import { fetchOrg, fetchRepos, fetchContributors, fetchIssues, fetchRateLimit, fetchPulls } from '../services/github'
 import { buildAnalyticalModel, getTopRepositories } from '../services/analytics'
 import { saveAnalysis, loadAnalysis } from '../services/cache'
+import { saveRecentSearch } from '../utils/recentSearches'
 
 const Ctx = createContext(null)
 
@@ -248,11 +249,8 @@ export function AppProvider({ children }) {
       // Save to recent searches, canonicalized to the official login
       // casing returned by GitHub and deduplicated case-insensitively, so
       // `AOSSIE-Org` and `aossie-org` share one entry (and one cache key).
-      const prev = JSON.parse(localStorage.getItem('oe_recent') || '[]')
       const entry = validOrgs.map(o => o.login).join(', ')
-      const entryKey = entry.toLowerCase()
-      const next = [entry, ...prev.filter(r => String(r).toLowerCase() !== entryKey)].slice(0, 6)
-      localStorage.setItem('oe_recent', JSON.stringify(next))
+      saveRecentSearch(entry)
       return builtModel
     } catch (err) {
       setError(err.message === 'RATE_LIMIT'
